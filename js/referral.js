@@ -1,95 +1,95 @@
 // referral.js - نظام الإحالة الكامل
-class نظامالإحالة {
+class ReferralSystem {
     // إنشاء رمز إحالة فريد
-    static إنشاءرمزإحالة() {
-        const أحرف = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        let نتيجة = '';
+    static generateReferralCode() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let result = '';
         for (let i = 0; i < 8; i++) {
-            نتيجة += أحرف.charAt(Math.floor(Math.random() * أحرف.length));
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
         }
-        return نتيجة;
+        return result;
     }
 
     // التحقق من أن رمز الإحالة فريد
-    static async هلرمزالإحالةفريد(الرمز) {
+    static async isReferralCodeUnique(code) {
         try {
             const { data, error } = await supabase
-                .from('الملفاتالشخصية')
-                .select('رمز_الإحالة')
-                .eq('رمز_الإحالة', الرمز)
+                .from('profiles')
+                .select('referral_code')
+                .eq('referral_code', code)
                 .maybeSingle();
 
             // إذا لم يتم العثور على الرمز، فهو فريد
             return !data;
         } catch (error) {
-            console.error('خطأ في التحقق من uniqueness:', error);
+            console.error('Error checking referral code uniqueness:', error);
             return false;
         }
     }
 
     // إنشاء رمز إحالة فريد مع محاولات متعددة
-    static async إنشاءرمزإحالةفريد() {
-        let رمز;
-        let هوفريد = false;
-        let محاولات = 0;
-        const أقصىمحاولات = 5;
+    static async createUniqueReferralCode() {
+        let code;
+        let isUnique = false;
+        let attempts = 0;
+        const maxAttempts = 5;
 
-        while (!هوفريد && محاولات < أقصىمحاولات) {
-            رمز = this.إنشاءرمزإحالة();
-            هوفريد = await this.هلرمزالإحالةفريد(الرمز);
-            محاولات++;
-            console.log(`محاولة ${محاولات}: الرمز ${رمز} - فريد: ${هوفريد}`);
+        while (!isUnique && attempts < maxAttempts) {
+            code = this.generateReferralCode();
+            isUnique = await this.isReferralCodeUnique(code);
+            attempts++;
+            console.log(`محاولة ${attempts}: الرمز ${code} - فريد: ${isUnique}`);
             
-            if (!هوفريد) {
+            if (!isUnique) {
                 await new Promise(resolve => setTimeout(resolve, 100));
             }
         }
 
-        if (!هوفريد) {
+        if (!isUnique) {
             // إذا فشلت جميع المحاولات، إنشاء رمز باستخدام timestamp
-            رمز = 'REF' + Date.now().toString(36).toUpperCase().substring(0, 5);
-            console.log(`استخدام الرمز الاحتياطي: ${رمز}`);
+            code = 'REF' + Date.now().toString(36).toUpperCase().substring(0, 5);
+            console.log(`استخدام الرمز الاحتياطي: ${code}`);
         }
 
-        return رمز;
+        return code;
     }
 
     // إنشاء ملف المستخدم مع رمز الإحالة
-    static async إنشاءملفالمستخدم(مستخدم, تمتالإحالةبواسطة = null) {
+    static async createUserProfile(user, referredBy = null) {
         try {
-            console.log('بدء إنشاءملفالمستخدم للمستخدم:', مستخدم.id);
+            console.log('بدء إنشاء ملف المستخدم:', user.id);
             
-            if (!مستخدم || !مستخدم.id) {
+            if (!user || !user.id) {
                 throw new Error('بيانات المستخدم غير صالحة');
             }
 
             // التحقق أولاً إذا كان الملف موجوداً بالفعل
-            const الملفالحالي = await this.الحصولعلىملفالمستخدم(مستخدم.id);
-            if (الملفالحالي) {
-                console.log('الملف موجود بالفعل:', الملفالحالي);
-                return الملفالحالي;
+            const existingProfile = await this.getUserProfile(user.id);
+            if (existingProfile) {
+                console.log('الملف موجود بالفعل:', existingProfile);
+                return existingProfile;
             }
 
             // إنشاء رمز إحالة فريد
-            const رمزالإحالة = await this.إنشاءرمزإحالةفريد();
-            console.log('الرمز المنشأ:', رمزالإحالة);
+            const referralCode = await this.createUniqueReferralCode();
+            console.log('الرمز المنشأ:', referralCode);
 
-            const بياناتالملف = {
-                معرف_المستخدم: مستخدم.id,
-                رمز_الإحالة: رمزالإحالة,
-                تمت_الإحالة_بواسطة: تمتالإحالةبواسطة,
-                عدد_الإحالات: 0,
-                النقاط: 0,
-                المرتبة: 0,
-                هو_مدير: false
+            const profileData = {
+                user_id: user.id,
+                referral_code: referralCode,
+                referred_by: referredBy,
+                referral_count: 0,
+                points: 0,
+                rank: 0,
+                is_admin: false
             };
 
-            console.log('بيانات الملف المراد إدراجها:', بياناتالملف);
+            console.log('بيانات الملف المراد إدراجها:', profileData);
 
             // محاولة الإدراج
             const { data, error } = await supabase
-                .from('الملفاتالشخصية')
-                .insert([بياناتالملف])
+                .from('profiles')
+                .insert([profileData])
                 .select();
 
             if (error) {
@@ -98,14 +98,14 @@ class نظامالإحالة {
                 // إذا كان الخطأ بسبب تكرار user_id (الملف موجود بالفعل)
                 if (error.code === '23505') {
                     console.log('الملف موجود بالفعل (تكرار user_id)، جاري البحث...');
-                    const موجود = await this.الحصولعلىملفالمستخدم(مستخدم.id);
-                    return موجود;
+                    const existing = await this.getUserProfile(user.id);
+                    return existing;
                 }
                 
                 // إذا كان الخطأ بسبب RLS، نحاول بطريقة بديلة
                 if (error.message.includes('row-level security') || error.code === '42501') {
                     console.log('خطأ RLS، جرب طريقة بديلة...');
-                    return await this.إنشاءملفبديل(مستخدم.id, رمزالإحالة, تمتالإحالةبواسطة);
+                    return await this.createProfileAlternative(user.id, referralCode, referredBy);
                 }
                 
                 throw error;
@@ -119,41 +119,41 @@ class نظامالإحالة {
             }
 
         } catch (error) {
-            console.error('خطأ في إنشاءملفالمستخدم:', error);
+            console.error('خطأ في إنشاء ملف المستخدم:', error);
             
             // محاولة إنشاء الملف بطريقة بديلة
             try {
                 console.log('محاولة الطريقة البديلة...');
-                const نتيجةالبديل = await this.إنشاءملفبديل(مستخدم.id, تمتالإحالةبواسطة);
-                return نتيجةالبديل;
-            } catch (خطأالبديل) {
-                console.error('فشل الطريقة البديلة:', خطأالبديل);
+                const fallbackResult = await this.createProfileAlternative(user.id, referredBy);
+                return fallbackResult;
+            } catch (fallbackError) {
+                console.error('فشل الطريقة البديلة:', fallbackError);
                 throw new Error(`فشل في إنشاء الملف الشخصي: ${error.message}`);
             }
         }
     }
 
     // طريقة بديلة لإنشاء الملف
-    static async إنشاءملفبديل(معرفالمستخدم, رمزالإحالة = null, تمتالإحالةبواسطة = null) {
+    static async createProfileAlternative(userId, referralCode = null, referredBy = null) {
         try {
-            if (!رمزالإحالة) {
-                رمزالإحالة = 'ALT' + Date.now().toString(36).toUpperCase().substring(0, 5);
+            if (!referralCode) {
+                referralCode = 'ALT' + Date.now().toString(36).toUpperCase().substring(0, 5);
             }
 
             // محاولة استخدام upsert
             const { data, error } = await supabase
-                .from('الملفاتالشخصية')
+                .from('profiles')
                 .upsert([{
-                    معرف_المستخدم: معرفالمستخدم,
-                    رمز_الإحالة: رمزالإحالة,
-                    تمت_الإحالة_بواسطة: تمتالإحالةبواسطة,
-                    عدد_الإحالات: 0,
-                    النقاط: 0,
-                    المرتبة: 0,
-                    هو_مدير: false,
-                    تم_التحديث_في: new Date().toISOString()
+                    user_id: userId,
+                    referral_code: referralCode,
+                    referred_by: referredBy,
+                    referral_count: 0,
+                    points: 0,
+                    rank: 0,
+                    is_admin: false,
+                    updated_at: new Date().toISOString()
                 }], {
-                    onConflict: 'معرف_المستخدم',
+                    onConflict: 'user_id',
                     ignoreDuplicates: false
                 })
                 .select();
@@ -170,12 +170,12 @@ class نظامالإحالة {
     }
 
     // البحث عن ملف مستخدم موجود
-    static async الحصولعلىملفالمستخدم(معرفالمستخدم) {
+    static async getUserProfile(userId) {
         try {
             const { data, error } = await supabase
-                .from('الملفاتالشخصية')
+                .from('profiles')
                 .select('*')
-                .eq('معرف_المستخدم', معرفالمستخدم)
+                .eq('user_id', userId)
                 .maybeSingle();
                 
             if (error && error.code !== 'PGRST116') {
@@ -185,20 +185,20 @@ class نظامالإحالة {
             
             return data;
         } catch (error) {
-            console.error('خطأ في الحصولعلىملفالمستخدم:', error);
+            console.error('خطأ في الحصول على ملف المستخدم:', error);
             return null;
         }
     }
 
     // التحقق من صحة رمز الإحالة
-    static async التحققمنصحةرمزالإحالة(الرمز) {
+    static async validateReferralCode(code) {
         try {
-            console.log('التحقق من صحة الرمز:', الرمز);
+            console.log('التحقق من صحة الرمز:', code);
             
             const { data, error } = await supabase
-                .from('الملفاتالشخصية')
-                .select('معرف_المستخدم')
-                .eq('رمز_الإحالة', الرمز.toUpperCase().trim())
+                .from('profiles')
+                .select('user_id')
+                .eq('referral_code', code.toUpperCase().trim())
                 .maybeSingle();
 
             if (error) {
@@ -206,26 +206,26 @@ class نظامالإحالة {
                 return null;
             }
 
-            console.log('نتيجة التحقق:', data ? data.معرف_المستخدم : 'غير صحيح');
-            return data ? data.معرف_المستخدم : null;
+            console.log('نتيجة التحقق:', data ? data.user_id : 'غير صحيح');
+            return data ? data.user_id : null;
         } catch (error) {
-            console.error('خطأ في التحققمنصحةرمزالإحالة:', error);
+            console.error('خطأ في التحقق من صحة رمز الإحالة:', error);
             return null;
         }
     }
 
     // زيادة عداد الإحالات للمستخدم
-    static async زيادةعدادالإحالة(معرفالمستخدم) {
+    static async incrementReferralCount(userId) {
         try {
-            console.log('زيادة عداد الإحالات للمستخدم:', معرفالمستخدم);
+            console.log('زيادة عداد الإحالات للمستخدم:', userId);
             
             const { error } = await supabase
-                .from('الملفاتالشخصية')
+                .from('profiles')
                 .update({ 
-                    عدد_الإحالات: supabase.sql('عدد_الإحالات + 1'),
-                    تم_التحديث_في: new Date().toISOString()
+                    referral_count: supabase.sql('referral_count + 1'),
+                    updated_at: new Date().toISOString()
                 })
-                .eq('معرف_المستخدم', معرفالمستخدم);
+                .eq('user_id', userId);
 
             if (error) {
                 console.error('خطأ في زيادة العداد:', error);
@@ -235,56 +235,56 @@ class نظامالإحالة {
             console.log('تم زيادة عداد الإحالات');
             return true;
         } catch (error) {
-            console.error('خطأ في زيادةعدادالإحالة:', error);
+            console.error('خطأ في زيادة عداد الإحالة:', error);
             throw error;
         }
     }
 
     // الحصول على بيانات الإحالة للمستخدم
-    static async الحصولعلىبياناتالإحالة(معرفالمستخدم) {
+    static async getUserReferralData(userId) {
         try {
             const { data, error } = await supabase
-                .from('الملفاتالشخصية')
-                .select('رمز_الإحالة, عدد_الإحالات, تمت_الإحالة_بواسطة')
-                .eq('معرف_المستخدم', معرفالمستخدم)
+                .from('profiles')
+                .select('referral_code, referral_count, referred_by')
+                .eq('user_id', userId)
                 .single();
 
             if (error) {
-                console.error('خطأ في الحصولعلىبياناتالإحالة:', error);
+                console.error('خطأ في الحصول على بيانات الإحالة:', error);
                 return null;
             }
 
             return data;
         } catch (error) {
-            console.error('خطأ في الحصولعلىبياناتالإحالة:', error);
+            console.error('خطأ في الحصول على بيانات الإحالة:', error);
             return null;
         }
     }
 
     // إنشاء رابط الإحالة
-    static إنشاءرابطالإحالة(رمزالإحالة) {
-        const الرابطالأساسي = window.location.origin + window.location.pathname;
-        return `${الرابطالأساسي}?ref=${رمزالإحالة}`;
+    static generateReferralLink(referralCode) {
+        const baseUrl = window.location.origin + window.location.pathname;
+        return `${baseUrl}?ref=${referralCode}`;
     }
 
     // الحصول على عدد الإحالات الإجمالي
-    static async الحصولعلىعددالإحالاتالإجمالي(معرفالمستخدم) {
+    static async getTotalReferrals(userId) {
         try {
             const { data, error } = await supabase
-                .from('الملفاتالشخصية')
-                .select('عدد_الإحالات')
-                .eq('معرف_المستخدم', معرفالمستخدم)
+                .from('profiles')
+                .select('referral_count')
+                .eq('user_id', userId)
                 .single();
 
             if (error) {
-                console.error('خطأ في الحصولعلىعددالإحالاتالإجمالي:', error);
+                console.error('خطأ في الحصول على عدد الإحالات الإجمالي:', error);
                 return 0;
             }
 
-            return data.عدد_الإحالات || 0;
+            return data.referral_count || 0;
         } catch (error) {
-            console.error('خطأ في الحصولعلىعددالإحالاتالإجمالي:', error);
+            console.error('خطأ في الحصول على عدد الإحالات الإجمالي:', error);
             return 0;
         }
     }
-                }
+            }
