@@ -131,8 +131,7 @@ class Navigation {
     }
 
     static updateNavigation() {
-        // تحديث عناصر الهيدر
-        const headerElements = {
+        const elements = {
             'publish-link': currentUser,
             'profile-link': currentUser,
             'logout-link': currentUser,
@@ -140,22 +139,11 @@ class Navigation {
             'register-link': !currentUser
         };
 
-        for (const [id, shouldShow] of Object.entries(headerElements)) {
+        for (const [id, shouldShow] of Object.entries(elements)) {
             const element = document.getElementById(id);
             if (element) {
                 element.style.display = shouldShow ? 'list-item' : 'none';
             }
-        }
-
-        // تحديث أيقونات الفوتر
-        const footerProfile = document.getElementById('footer-profile-link');
-        const footerPublish = document.getElementById('footer-publish-link');
-        
-        if (footerProfile) {
-            footerProfile.style.display = currentUser ? 'flex' : 'none';
-        }
-        if (footerPublish) {
-            footerPublish.style.display = currentUser ? 'flex' : 'none';
         }
     }
 
