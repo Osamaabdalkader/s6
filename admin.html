@@ -1,0 +1,117 @@
+<!-- صفحة الإدارة العامة -->
+<section id="admin-page" class="page">
+    <div class="admin-container">
+        <h1 class="section-title">لوحة التحكم الإدارية</h1>
+        
+        <div class="admin-stats">
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <h3 id="total-users">0</h3>
+                <p>إجمالي المستخدمين</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-chart-line"></i>
+                <h3 id="total-points">0</h3>
+                <p>إجمالي النقاط</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-crown"></i>
+                <h3 id="active-today">0</h3>
+                <p>نشط اليوم</p>
+            </div>
+        </div>
+
+        <div class="admin-controls">
+            <div class="search-filter-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="admin-search" placeholder="ابحث بالاسم أو البريد الإلكتروني...">
+                </div>
+                
+                <div class="filter-controls">
+                    <select id="rank-filter">
+                        <option value="">جميع المراتب</option>
+                        <option value="0">مبتدئ</option>
+                        <option value="1">عضو</option>
+                        <option value="2">قائد</option>
+                        <option value="3">خبير</option>
+                        <option value="4">محترف</option>
+                        <option value="5">ماستر</option>
+                    </select>
+                    
+                    <button id="add-points-bulk" class="btn-primary">
+                        <i class="fas fa-plus-circle"></i> إضافة نقاط جماعية
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="users-table-container">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all"></th>
+                        <th>الاسم</th>
+                        <th>البريد الإلكتروني</th>
+                        <th>النقاط</th>
+                        <th>المرتبة</th>
+                        <th>تاريخ التسجيل</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- سيتم ملء الجدول بواسطة JavaScript -->
+                </tbody>
+            </table>
+            
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    عرض <span id="current-range">1-10</span> من <span id="total-users-count">0</span> مستخدم
+                </div>
+                <div class="pagination-controls">
+                    <button id="prev-page" class="btn-secondary" disabled>
+                        <i class="fas fa-chevron-right"></i> السابق
+                    </button>
+                    <span id="page-numbers" class="page-numbers"></span>
+                    <button id="next-page" class="btn-secondary">
+                        التالي <i class="fas fa-chevron-left"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- نافذة إضافة النقاط -->
+        <div id="points-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>إضافة نقاط للمستخدم</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="points-amount">كمية النقاط:</label>
+                        <input type="number" id="points-amount" min="1" max="1000" value="10">
+                    </div>
+                    <div class="form-group">
+                        <label for="points-reason">السبب:</label>
+                        <select id="points-reason">
+                            <option value="مكافأة إدارية">مكافأة إدارية</option>
+                            <option value="نشاط مميز">نشاط مميز</option>
+                            <option value="مشاركة فعالة">مشاركة فعالة</option>
+                            <option value="إحالة ناجحة">إحالة ناجحة</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="custom-reason">سبب مخصص (اختياري):</label>
+                        <input type="text" id="custom-reason" placeholder="أدخل السبب المخصص">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="confirm-add-points" class="btn-primary">إضافة النقاط</button>
+                    <button class="btn-secondary close-modal">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

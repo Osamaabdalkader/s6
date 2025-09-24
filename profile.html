@@ -1,8 +1,9 @@
-<!-- صفحة حسابي -->
+<!-- صفحة حسابي (محدثة) -->
 <section id="profile-page" class="page">
     <h1 class="section-title">حسابي</h1>
     <div id="profile-content">
         <div class="profile-card">
+            <!-- معلومات المستخدم الأساسية -->
             <div class="profile-info">
                 <div class="profile-label"><i class="fas fa-user"></i> الاسم:</div>
                 <div id="profile-name"></div>
@@ -23,13 +24,80 @@
                 <div class="profile-label"><i class="fas fa-calendar-alt"></i> تاريخ إنشاء الحساب:</div>
                 <div id="profile-created"></div>
             </div>
+            
+            <!-- قسم النقاط والمرتبة -->
+            <div class="points-rank-section">
+                <h3><i class="fas fa-trophy"></i> النقاط والمرتبة</h3>
+                <div class="profile-info">
+                    <div class="profile-label"><i class="fas fa-star"></i> النقاط:</div>
+                    <div id="profile-points" class="points-display">0</div>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-label"><i class="fas fa-crown"></i> المرتبة:</div>
+                    <div id="profile-rank" class="rank-display">
+                        <span class="rank-badge rank-0">مبتدئ</span>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-label"><i class="fas fa-chart-line"></i> التقدم:</div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="profile-progress-fill"></div>
+                        </div>
+                        <span id="profile-progress-text">0%</span>
+                    </div>
+                </div>
+                <button onclick="Navigation.showPage('team')" class="btn-primary">
+                    <i class="fas fa-users"></i> عرض فريقي وتقدمي
+                </button>
+            </div>
+            
+            <!-- قسم الإحالات -->
+            <div class="referral-section">
+                <h3><i class="fas fa-handshake"></i> نظام الإحالة</h3>
+                <div class="profile-info">
+                    <div class="profile-label"><i class="fas fa-code"></i> رمز الإحالة:</div>
+                    <div class="referral-code-display">
+                        <span id="profile-referral-code">--</span>
+                        <button id="copy-referral-code" class="btn-small">
+                            <i class="fas fa-copy"></i> نسخ
+                        </button>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-label"><i class="fas fa-users"></i> عدد الإحالات:</div>
+                    <div id="profile-referral-count">0</div>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-label"><i class="fas fa-share-alt"></i> رابط الإحالة:</div>
+                    <div class="referral-link-container">
+                        <input type="text" id="profile-referral-link" readonly>
+                        <button id="copy-referral-link" class="btn-small">
+                            <i class="fas fa-copy"></i> نسخ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم للمديرين -->
+            <div id="admin-section" class="admin-section" style="display: none;">
+                <h3><i class="fas fa-cog"></i> الأدوات الإدارية</h3>
+                <div class="admin-links">
+                    <button onclick="Navigation.showPage('admin')" class="btn-admin">
+                        <i class="fas fa-users-cog"></i> لوحة التحكم الإدارية
+                    </button>
+                    <button onclick="PointsSystem.exportUserData()" class="btn-admin">
+                        <i class="fas fa-download"></i> تصدير بيانات المستخدمين
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     
     <div id="login-required-profile" class="login-required" style="display: none;">
         <h2>يجب تسجيل الدخول لعرض الملف الشخصي</h2>
         <p>يجب أن تكون مسجلاً في الموقع لعرض معلومات حسابك.</p>
-        <button onclick="showPage('login')"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</button>
-        <button onclick="showPage('register')" class="btn-secondary"><i class="fas fa-user-plus"></i> إنشاء حساب</button>
+        <button onclick="Navigation.showPage('login')"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</button>
+        <button onclick="Navigation.showPage('register')" class="btn-secondary"><i class="fas fa-user-plus"></i> إنشاء حساب</button>
     </div>
 </section>

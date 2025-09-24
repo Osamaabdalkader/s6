@@ -1,0 +1,113 @@
+<!-- صفحة إدارة الفريق -->
+<section id="team-page" class="page">
+    <div class="team-container">
+        <h1 class="section-title">فريقي ومراتبي</h1>
+        
+        <div class="team-stats">
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <h3 id="team-members-count">0</h3>
+                <p>أعضاء الفريق</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-trophy"></i>
+                <h3 id="current-rank">مبتدئ</h3>
+                <p>مرتبتي الحالية</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-star"></i>
+                <h3 id="team-points">0</h3>
+                <p>نقاط الفريق</p>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-chart-network"></i>
+                <h3 id="network-depth">0</h3>
+                <p>عمق الشبكة</p>
+            </div>
+        </div>
+
+        <div class="rank-progress">
+            <h3>تقدمي نحو المرتبة التالية</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="rank-progress-fill"></div>
+            </div>
+            <div class="progress-info">
+                <span id="current-rank-info">المرتبة الحالية: مبتدئ</span>
+                <span id="next-rank-info">المرتبة التالية: عضو (100 نقطة)</span>
+            </div>
+        </div>
+
+        <div class="team-members-section">
+            <h3>أعضاء فريقي</h3>
+            <div class="search-filter-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="team-search" placeholder="ابحث في أعضاء الفريق...">
+                </div>
+                <select id="team-rank-filter">
+                    <option value="">جميع المراتب</option>
+                    <option value="0">مبتدئ</option>
+                    <option value="1">عضو</option>
+                    <option value="2">قائد</option>
+                    <option value="3">خبير</option>
+                </select>
+            </div>
+
+            <div class="team-members-grid" id="team-members-container">
+                <!-- سيتم ملء أعضاء الفريق هنا -->
+            </div>
+        </div>
+
+        <div class="rank-requirements">
+            <h3>متطلبات الترقي للمراتب</h3>
+            <div class="requirements-list">
+                <div class="requirement-item" data-rank="0">
+                    <div class="requirement-header">
+                        <span class="rank-badge rank-0">مبتدئ</span>
+                        <span class="requirement-status achieved">محقق</span>
+                    </div>
+                    <p>التسجيل في المنصة</p>
+                </div>
+                <div class="requirement-item" data-rank="1">
+                    <div class="requirement-header">
+                        <span class="rank-badge rank-1">عضو</span>
+                        <span class="requirement-status" id="rank-1-status">غير محقق</span>
+                    </div>
+                    <p>تجميع 100 نقطة</p>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="rank-1-progress"></div>
+                        </div>
+                        <span id="rank-1-progress-text">0/100</span>
+                    </div>
+                </div>
+                <div class="requirement-item" data-rank="2">
+                    <div class="requirement-header">
+                        <span class="rank-badge rank-2">قائد</span>
+                        <span class="requirement-status" id="rank-2-status">غير محقق</span>
+                    </div>
+                    <p>3 أعضاء من الفريق وصلوا للمرتبة 1</p>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="rank-2-progress"></div>
+                        </div>
+                        <span id="rank-2-progress-text">0/3</span>
+                    </div>
+                </div>
+                <div class="requirement-item" data-rank="3">
+                    <div class="requirement-header">
+                        <span class="rank-badge rank-3">خبير</span>
+                        <span class="requirement-status" id="rank-3-status">غير محقق</span>
+                    </div>
+                    <p>3 أعضاء من الفريق وصلوا للمرتبة 2</p>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="rank-3-progress"></div>
+                        </div>
+                        <span id="rank-3-progress-text">0/3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
