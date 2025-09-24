@@ -5,15 +5,27 @@ const CONFIG = {
     
     PAGE_FILES: {
         'home': 'home.html',
-        'publish': 'publish.html', // تم التصحيح من add-post.html إلى publish.html
+        'publish': 'publish.html',
         'login': 'login.html',
         'register': 'register.html',
         'profile': 'profile.html',
-        'post-details': 'post-details.html' // تم التصحيح من post-details.html إلى post-detail.html
+        'post-details': 'post-details.html',
+        'admin': 'admin.html',
+        'team': 'team.html'
     },
     
-    MAX_IMAGE_SIZE: 5 * 1024 * 1024, // 5MB
-    SUCCESS_MESSAGE_DURATION: 3000
+    MAX_IMAGE_SIZE: 5 * 1024 * 1024,
+    SUCCESS_MESSAGE_DURATION: 3000,
+    REFERRAL_CODE_LENGTH: 8,
+    RANK_SETTINGS: {
+        0: { name: "مبتدئ", points: 0, required: "التسجيل في المنصة" },
+        1: { name: "عضو", points: 100, required: "تجميع 100 نقطة" },
+        2: { name: "قائد", points: 0, required: "3 أعضاء من الفريق وصلوا للمرتبة 1" },
+        3: { name: "خبير", points: 0, required: "3 أعضاء من الفريق وصلوا للمرتبة 2" },
+        4: { name: "محترف", points: 0, required: "3 أعضاء من الفريق وصلوا للمرتبة 3" },
+        5: { name: "ماستر", points: 0, required: "3 أعضاء من الفريق وصلوا للمرتبة 4" }
+    },
+    ITEMS_PER_PAGE: 10
 };
 
 // تهيئة Supabase
@@ -22,3 +34,4 @@ const supabase = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABA
 // المتغيرات العالمية
 let currentUser = null;
 let debugMode = false;
+let currentUserProfile = null;

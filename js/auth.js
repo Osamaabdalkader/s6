@@ -1,4 +1,4 @@
-// auth.js - معدل (مع تحسينات التصحيح)
+// auth.js - محدث مع نظام النقاط
 class Auth {
     static async login(email, password) {
         try {
@@ -18,6 +18,7 @@ class Auth {
             }
 
             currentUser = data.user;
+            await this.loadUserProfile();
             this.onAuthStateChange();
             
             Utils.showStatus('تم تسجيل الدخول بنجاح!', 'success', 'login-status');
@@ -35,15 +36,16 @@ class Auth {
 
     static async register(userData) {
         try {
-            console.log('بيانات التسجيل المرسلة إلى Supabase:', {
-                email: userData.email,
-                hasPassword: !!userData.password,
-                metadata: {
-                    full_name: userData.name,
-                    phone: userData.phone,
-                    address: userData.address
+            console.log('بيانات التسجيل المرسلة إلى Supabase:', userData);
+
+            // التحقق من رمز الإحالة إذا تم تقديمه
+            let referredBy = null;
+            if (userData.referralCode && userData.referralCode.trim() !== '') {
+                referredBy = await ReferralSystem.validateReferralCode(userData.referralCode.trim());
+                if (!referredBy) {
+                    throw new Error('رمز الإحالة غير صحيح');
                 }
-            });
+            }
 
             const { data, error } = await supabase.auth.signUp({
                 email: userData.email.trim(),
@@ -70,6 +72,19 @@ class Auth {
                 throw new Error(errorMessage);
             }
 
+            // إنشاء رمز إحالة للمستخدم الجديد وتسجيل الإحالة إذا وجدت
+            if (data.user) {
+                await ReferralSystem.createUserProfile(data.user, referredBy);
+                
+                // زيادة عداد الإحالة للمستخدم الذي أحال
+                if (referredBy) {
+                    await ReferralSystem.incrementReferralCount(referredBy);
+                }
+
+                // منح نقاط للمستخدم الجديد
+                await PointsSystem.addPoints(data.user.id, 10, "مكافأة تسجيل جديد");
+            }
+
             // إعادة تعيين النموذج بعد النجاح
             const form = document.getElementById('register-form');
             if (form) form.reset();
@@ -93,6 +108,7 @@ class Auth {
             if (error) throw error;
             
             currentUser = null;
+            currentUserProfile = null;
             this.onAuthStateChange();
             Navigation.showPage('home');
         } catch (error) {
@@ -108,10 +124,29 @@ class Auth {
             
             if (session?.user) {
                 currentUser = session.user;
+                await this.loadUserProfile();
                 this.onAuthStateChange();
             }
         } catch (error) {
             console.error('Error checking auth:', error.message);
+        }
+    }
+
+    static async loadUserProfile() {
+        try {
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .single();
+
+            if (error) throw error;
+            
+            currentUserProfile = profile;
+            return profile;
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+            return null;
         }
     }
 
@@ -124,14 +159,16 @@ class Auth {
     }
 
     static initAuthListener() {
-        supabase.auth.onAuthStateChange((event, session) => {
+        supabase.auth.onAuthStateChange(async (event, session) => {
             console.log('Auth state changed:', event);
             
             if (event === 'SIGNED_IN' && session?.user) {
                 currentUser = session.user;
+                await this.loadUserProfile();
                 this.onAuthStateChange();
             } else if (event === 'SIGNED_OUT') {
                 currentUser = null;
+                currentUserProfile = null;
                 this.onAuthStateChange();
             }
         });
