@@ -1,4 +1,4 @@
-// navigation.js - معدل
+// navigation.js - معدل (إضافة handlePublishPage)
 class Navigation {
     static async showPage(pageId, params = {}) {
         console.log(`جاري تحميل الصفحة: ${pageId}`, params);
@@ -169,4 +169,4 @@ class Navigation {
             </div>
         `;
     }
-}
+    }
