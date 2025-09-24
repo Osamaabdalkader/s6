@@ -1,176 +1,207 @@
-// auth.js - محدث مع نظام النقاط
+// auth.js - نظام المصادقة مع الإحالة
 class Auth {
-    static async login(email, password) {
+    static async تسجيلالدخول(بريدإلكتروني, كلمةالمرور) {
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email.trim(),
-                password: password.trim()
+            const { data, error } = await supabase.auth.trySignInWithPassword({
+                بريدإلكتروني: بريدإلكتروني.trim(),
+                كلمةالمرور: كلمةالمرور.trim()
             });
 
             if (error) {
-                let errorMessage = 'فشل تسجيل الدخول';
+                let رسالةخطأ = 'فشل تسجيل الدخول';
                 if (error.message.includes('Invalid login credentials')) {
-                    errorMessage = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+                    رسالةخطأ = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
                 } else if (error.message.includes('Email not confirmed')) {
-                    errorMessage = 'يرجى تأكيد البريد الإلكتروني أولاً';
+                    رسالةخطأ = 'يرجى تأكيد البريد الإلكتروني أولاً';
                 }
-                throw new Error(errorMessage);
+                throw new Error(رسالةخطأ);
             }
 
-            currentUser = data.user;
-            await this.loadUserProfile();
-            this.onAuthStateChange();
+            مستخدمحالي = data.user;
+            this.عندتغييرحالةالمصادقة();
             
-            Utils.showStatus('تم تسجيل الدخول بنجاح!', 'success', 'login-status');
+            Utils.عرضالحالة('تم تسجيل الدخول بنجاح!', 'نجاح', 'حالة-تسجيل-الدخول');
             
             setTimeout(() => {
-                Navigation.showPage('home');
+                Navigation.عرضالصفحة('الرئيسية');
             }, 1000);
 
             return true;
         } catch (error) {
-            console.error('Error signing in:', error);
+            console.error('خطأ في تسجيل الدخول:', error);
             throw error;
         }
     }
 
-    static async register(userData) {
+    static async إنشاءحساب(بياناتالمستخدم) {
         try {
-            console.log('بيانات التسجيل المرسلة إلى Supabase:', userData);
+            console.log('بدء عملية التسجيل...', {
+                بريدإلكتروني: بياناتالمستخدم.بريدإلكتروني,
+                اسم: بياناتالمستخدم.اسم,
+                لديهرمزإحالة: !!بياناتالمستخدم.رمزإحالة
+            });
 
             // التحقق من رمز الإحالة إذا تم تقديمه
-            let referredBy = null;
-            if (userData.referralCode && userData.referralCode.trim() !== '') {
-                referredBy = await ReferralSystem.validateReferralCode(userData.referralCode.trim());
-                if (!referredBy) {
+            let تمتالإحالةبواسطة = null;
+            if (بياناتالمستخدم.رمزإحالة && بياناتالمستخدم.رمزإحالة.trim() !== '') {
+                console.log('التحقق من رمز الإحالة:', بياناتالمستخدم.رمزإحالة);
+                تمتالإحالةبواسطة = await نظامالإحالة.التحققمنصحةرمزالإحالة(بياناتالمستخدم.رمزإحالة.trim());
+                console.log('نتيجة التحقق:', تمتالإحالةبواسطة);
+                if (!تمتالإحالةبواسطة) {
                     throw new Error('رمز الإحالة غير صحيح');
                 }
             }
 
+            console.log('إنشاء حساب في Supabase Auth...');
             const { data, error } = await supabase.auth.signUp({
-                email: userData.email.trim(),
-                password: userData.password.trim(),
+                email: بياناتالمستخدم.بريدإلكتروني.trim(),
+                password: بياناتالمستخدم.كلمةالمرور.trim(),
                 options: {
                     data: {
-                        full_name: userData.name.trim(),
-                        phone: userData.phone.trim(),
-                        address: userData.address.trim()
+                        full_name: بياناتالمستخدم.اسم.trim(),
+                        phone: بياناتالمستخدم.هاتف.trim(),
+                        address: بياناتالمستمخدم.عنوان.trim()
                     }
                 }
             });
 
             if (error) {
-                console.error('Supabase error:', error);
-                let errorMessage = 'فشل في إنشاء الحساب';
+                console.error('خطأ في التسجيل:', error);
+                let رسالةخطأ = 'فشل في إنشاء الحساب';
                 if (error.message.includes('User already registered')) {
-                    errorMessage = 'هذا البريد الإلكتروني مسجل مسبقاً';
+                    رسالةخطأ = 'هذا البريد الإلكتروني مسجل مسبقاً';
                 } else if (error.message.includes('Password should be at least')) {
-                    errorMessage = 'كلمة المرور يجب أن تكون أقوى (6 أحرف على الأقل)';
+                    رساءةخطأ = 'كلمة المرور يجب أن تكون أقوى (6 أحرف على الأقل)';
                 } else if (error.message.includes('Invalid email')) {
-                    errorMessage = 'البريد الإلكتروني غير صحيح';
+                    رساءةخطأ = 'البريد الإلكتروني غير صحيح';
                 }
-                throw new Error(errorMessage);
+                throw new Error(رساءةخطأ);
             }
+
+            console.log('تم إنشاء المستخدم في Auth:', data.user ? 'نعم' : 'لا');
 
             // إنشاء رمز إحالة للمستخدم الجديد وتسجيل الإحالة إذا وجدت
             if (data.user) {
-                await ReferralSystem.createUserProfile(data.user, referredBy);
+                console.log('بدء إنشاء الملف الشخصي...');
+                const تمإنشاءالملف = await نظامالإحالة.إنشاءملفالمستخدم(data.user, تمتالإحالةبواسطة);
                 
-                // زيادة عداد الإحالة للمستخدم الذي أحال
-                if (referredBy) {
-                    await ReferralSystem.incrementReferralCount(referredBy);
-                }
+                if (تمإنشاءالملف) {
+                    console.log('تم إنشاء الملف الشخصي بنجاح');
+                    
+                    // زيادة عداد الإحالة للمستخدم الذي أحال
+                    if (تمتالإحالةبواسطة) {
+                        console.log('زيادة عداد الإحالة للمستخدم:', تمتالإحالةبواسطة);
+                        await نظامالإحالة.زيادةعدادالإحالة(تمتالإحالةبواسطة);
+                        console.log('تم زيادة العداد');
+                    }
 
-                // منح نقاط للمستخدم الجديد
-                await PointsSystem.addPoints(data.user.id, 10, "مكافأة تسجيل جديد");
+                    // منح نقاط ترحيبية للمستخدم الجديد
+                    console.log('منح نقاط ترحيبية...');
+                    await نظامالنقاط.إضافةنقاط(data.user.id, 10, "نقاط ترحيبية للتسجيل");
+                    console.log('تم منح النقاط');
+                } else {
+                    console.error('فشل في إنشاء الملف الشخصي');
+                    throw new Error('فشل في إنشاء الملف الشخصي');
+                }
+            } else {
+                console.error('لم يتم إنشاء data.user - قد تكون هناك مشكلة في Supabase Auth');
+                throw new Error('فشل في إنشاء المستخدم');
             }
 
             // إعادة تعيين النموذج بعد النجاح
-            const form = document.getElementById('register-form');
-            if (form) form.reset();
+            const نموذج = document.getElementById('نموذج-التسجيل');
+            if (نموذج) نموذج.reset();
 
-            Utils.showStatus('تم إنشاء الحساب بنجاح! يرجى تسجيل الدخول', 'success', 'register-status');
+            Utils.عرضالحالة('تم إنشاء الحساب بنجاح! يرجى تسجيل الدخول', 'نجاح', 'حالة-التسجيل');
             
             setTimeout(() => {
-                Navigation.showPage('login');
+                Navigation.عرضالصفحة('تسجيل-الدخول');
             }, 2000);
 
             return true;
         } catch (error) {
-            console.error('Error signing up:', error);
+            console.error('خطأ كامل في التسجيل:', error);
+            
+            // عرض رسالة خطأ أكثر وضوحاً
+            let رسالةخطأ = error.message;
+            if (error.message.includes('referral')) {
+                رساءةخطأ = 'رمز الإحالة غير صحيح. يرجى التحقق وإعادة المحاولة.';
+            }
+            
+            Utils.عرضالحالة(`فشل في إنشاء الحساب: ${رساءةخطأ}`, 'خطأ', 'حالة-التسجيل');
             throw error;
         }
     }
 
-    static async logout() {
+    static async تسجيلالخروج() {
         try {
             const { error } = await supabase.auth.signOut();
             if (error) throw error;
             
-            currentUser = null;
-            currentUserProfile = null;
-            this.onAuthStateChange();
-            Navigation.showPage('home');
+            مستخدمحالي = null;
+            ملفالمستخدمالحالي = null;
+            this.عندتغييرحالةالمصادقة();
+            Navigation.عرضالصفحة('الرئيسية');
         } catch (error) {
-            console.error('Error signing out:', error.message);
+            console.error('خطأ في تسجيل الخروج:', error.message);
             alert(`خطأ في تسجيل الخروج: ${error.message}`);
         }
     }
 
-    static async checkAuth() {
+    static async التحققمنالمصادقة() {
         try {
             const { data: { session }, error } = await supabase.auth.getSession();
             if (error) throw error;
             
             if (session?.user) {
-                currentUser = session.user;
-                await this.loadUserProfile();
-                this.onAuthStateChange();
+                مستخدمحالي = session.user;
+                await this.تحميلملفالمستخدم();
+                this.عندتغييرحالةالمصادقة();
             }
         } catch (error) {
-            console.error('Error checking auth:', error.message);
+            console.error('خطأ في التحقق من المصادقة:', error.message);
         }
     }
 
-    static async loadUserProfile() {
+    static async تحميلملفالمستخدم() {
         try {
-            const { data: profile, error } = await supabase
-                .from('profiles')
+            const { data: ملف, error } = await supabase
+                .from('الملفاتالشخصية')
                 .select('*')
-                .eq('user_id', currentUser.id)
+                .eq('معرف_المستخدم', مستخدمحالي.id)
                 .single();
 
             if (error) throw error;
             
-            currentUserProfile = profile;
-            return profile;
+            ملفالمستخدمالحالي = ملف;
+            return ملف;
         } catch (error) {
-            console.error('Error loading user profile:', error);
+            console.error('خطأ في تحميل ملف المستخدم:', error);
             return null;
         }
     }
 
-    static onAuthStateChange() {
-        Navigation.updateNavigation();
+    static عندتغييرحالةالمصادقة() {
+        Navigation.تحديثالتنقل();
         
-        if (currentUser) {
-            Utils.showStatus('تم تسجيل الدخول بنجاح', 'success', 'connection-status');
+        if (مستخدمحالي) {
+            Utils.عرضالحالة('تم تسجيل الدخول بنجاح', 'نجاح', 'حالة-الاتصال');
         }
     }
 
-    static initAuthListener() {
+    static تهيئةمستمعالمصادقة() {
         supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('Auth state changed:', event);
+            console.log('تغيرت حالة المصادقة:', event);
             
             if (event === 'SIGNED_IN' && session?.user) {
-                currentUser = session.user;
-                await this.loadUserProfile();
-                this.onAuthStateChange();
+                مستخدمحالي = session.user;
+                await this.تحميلملفالمستخدم();
+                this.عندتغييرحالةالمصادقة();
             } else if (event === 'SIGNED_OUT') {
-                currentUser = null;
-                currentUserProfile = null;
-                this.onAuthStateChange();
+                مستخدمحالي = null;
+                ملفالمستخدمالحالي = null;
+                this.عندتغييرحالةالمصادقة();
             }
         });
     }
-}
+                    }
