@@ -5,11 +5,11 @@ const CONFIG = {
     
     PAGE_FILES: {
         'home': 'home.html',
-        'publish': 'add-post.html',
+        'publish': 'publish.html', // تم التصحيح من add-post.html إلى publish.html
         'login': 'login.html',
         'register': 'register.html',
         'profile': 'profile.html',
-        'post-details': 'post-details.html' // تم الإضافة
+        'post-details': 'post-detail.html' // تم التصحيح من post-details.html إلى post-detail.html
     },
     
     MAX_IMAGE_SIZE: 5 * 1024 * 1024, // 5MB
