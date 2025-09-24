@@ -42,6 +42,7 @@ class Navigation {
                 break;
             case 'home':
                 Posts.loadPosts();
+                Posts.initSearchAndFilter(); // إضافة هذا السطر لتهيئة البحث والفلترة
                 break;
             case 'post-details':
                 this.handlePostDetailsPage(params);
@@ -50,14 +51,6 @@ class Navigation {
         
         // إعادة ربط الأحداث بعد تهيئة الصفحة
         this.rebindPageEvents(pageId);
-    }
-
-    // إعادة ربط الأحداث الخاصة بالصفحة
-    static rebindPageEvents(pageId) {
-        console.log(`إعادة ربط أحداث الصفحة: ${pageId}`);
-        
-        // هذه الوظيفة تتعامل مع أي أحداث خاصة تحتاج إلى ربط يدوي
-        // الأحداث الرئيسية تتم معالجتها عبر النظام العالمي في App.js
     }
 
     static handlePublishPage() {
@@ -76,7 +69,6 @@ class Navigation {
     }
 
     static handleLoginPage() {
-        // تنظيف رسائل الحالة عند تحميل الصفحة
         const statusEl = document.getElementById('login-status');
         if (statusEl) {
             statusEl.style.display = 'none';
@@ -84,7 +76,6 @@ class Navigation {
     }
 
     static handleRegisterPage() {
-        // تنظيف رسائل الحالة عند تحميل الصفحة
         const statusEl = document.getElementById('register-status');
         if (statusEl) {
             statusEl.style.display = 'none';
@@ -131,7 +122,6 @@ class Navigation {
     }
 
     static updateNavigation() {
-        // تحديث عناصر الهيدر
         const headerElements = {
             'publish-link': currentUser,
             'profile-link': currentUser,
@@ -147,7 +137,6 @@ class Navigation {
             }
         }
 
-        // تحديث أيقونات الفوتر
         const footerProfile = document.getElementById('footer-profile-link');
         const footerPublish = document.getElementById('footer-publish-link');
         
@@ -169,4 +158,8 @@ class Navigation {
             </div>
         `;
     }
+
+    static rebindPageEvents(pageId) {
+        console.log(`إعادة ربط أحداث الصفحة: ${pageId}`);
     }
+            }
