@@ -1,95 +1,95 @@
 // formHandlers.js - معالجات النماذج
-class معالجاتالنماذج {
+class FormHandlers {
     // معالجة نموذج تسجيل الدخول
-    static async معالجةنموذجتسجيلالدخول(بياناتالنموذج) {
-        const بريدإلكتروني = بياناتالنموذج.get('بريدإلكتروني');
-        const كلمةالمرور = بياناتالنموذج.get('كلمةالمرور');
+    static async handleLoginForm(formData) {
+        const email = formData.get('email');
+        const password = formData.get('password');
 
-        if (!بريدإلكتروني || !كلمةالمرور) {
-            Utils.عرضالحالة('يرجى ملء جميع الحقول', 'خطأ', 'حالة-تسجيل-الدخول');
+        if (!email || !password) {
+            Utils.showStatus('يرجى ملء جميع الحقول', 'error', 'login-status');
             return;
         }
 
         try {
-            Utils.عرضالحالة('جاري تسجيل الدخول...', 'نجاح', 'حالة-تسجيل-الدخول');
-            await Auth.تسجيلالدخول(بريدإلكتروني, كلمةالمرور);
+            Utils.showStatus('جاري تسجيل الدخول...', 'success', 'login-status');
+            await Auth.login(email, password);
         } catch (error) {
-            Utils.عرضالحالة(`فشل تسجيل الدخول: ${error.message}`, 'خطأ', 'حالة-تسجيل-الدخول');
+            Utils.showStatus(`فشل تسجيل الدخول: ${error.message}`, 'error', 'login-status');
         }
     }
 
     // معالجة نموذج إنشاء حساب
-    static async معالجةنموذجإنشاءحساب(بياناتالنموذج) {
-        const بياناتالمستخدم = {
-            اسم: بياناتالنموذج.get('اسم'),
-            هاتف: بياناتالنموذج.get('هاتف'),
-            عنوان: بياناتالنموذج.get('عنوان'),
-            بريدإلكتروني: بياناتالنموذج.get('بريدإلكتروني'),
-            كلمةالمرور: بياناتالنموذج.get('كلمةالمرور'),
-            تأكيدكلمةالمرور: بياناتالنموذج.get('تأكيدكلمةالمرور'),
-            رمزإحالة: بياناتالنموذج.get('رمزإحالة')
+    static async handleRegisterForm(formData) {
+        const userData = {
+            name: formData.get('name'),
+            phone: formData.get('phone'),
+            address: formData.get('address'),
+            email: formData.get('email'),
+            password: formData.get('password'),
+            confirmPassword: formData.get('confirmPassword'),
+            referralCode: formData.get('referralCode')
         };
 
-        console.log('بيانات التسجيل المستلمة:', بياناتالمستخدم);
+        console.log('بيانات التسجيل المستلمة:', userData);
 
         // التحقق من البيانات
-        if (!بياناتالمستخدم.اسم || !بياناتالمستخدم.هاتف || !بياناتالمستخدم.عنوان || 
-            !بياناتالمستخدم.بريدإلكتروني || !بياناتالمستخدم.كلمةالمرور || !بياناتالمستخدم.تأكيدكلمةالمرور) {
-            Utils.عرضالحالة('يرجى ملء جميع الحقول الإلزامية', 'خطأ', 'حالة-التسجيل');
+        if (!userData.name || !userData.phone || !userData.address || 
+            !userData.email || !userData.password || !userData.confirmPassword) {
+            Utils.showStatus('يرجى ملء جميع الحقول الإلزامية', 'error', 'register-status');
             return;
         }
 
-        if (بياناتالمستخدم.كلمةالمرور !== بياناتالمستخدم.تأكيدكلمةالمرور) {
-            Utils.عرضالحالة('كلمة المرور غير متطابقة', 'خطأ', 'حالة-التسجيل');
+        if (userData.password !== userData.confirmPassword) {
+            Utils.showStatus('كلمة المرور غير متطابقة', 'error', 'register-status');
             return;
         }
 
-        if (بياناتالمستخدم.كلمةالمرور.length < 6) {
-            Utils.عرضالحالة('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'خطأ', 'حالة-التسجيل');
+        if (userData.password.length < 6) {
+            Utils.showStatus('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'error', 'register-status');
             return;
         }
 
         try {
-            Utils.عرضالحالة('جاري إنشاء الحساب...', 'نجاح', 'حالة-التسجيل');
-            await Auth.إنشاءحساب(بياناتالمستخدم);
+            Utils.showStatus('جاري إنشاء الحساب...', 'success', 'register-status');
+            await Auth.register(userData);
         } catch (error) {
-            console.error('خطأ في معالجةنموذجإنشاءحساب:', error);
+            console.error('Error in handleRegisterForm:', error);
         }
     }
 
     // معالجة نموذج النشر
-    static async معالجةنموذجالنشر(بياناتالنموذج) {
-        if (!مستخدمحالي) {
-            Utils.عرضالحالة('يجب تسجيل الدخول لنشر منشور', 'خطأ');
-            Navigation.عرضالصفحة('تسجيل-الدخول');
+    static async handlePublishForm(formData) {
+        if (!currentUser) {
+            Utils.showStatus('يجب تسجيل الدخول لنشر منشور', 'error');
+            Navigation.showPage('login');
             return;
         }
 
-        const بياناتالمنشور = {
-            اسم: بياناتالنموذج.get('اسم'),
-            وصف: بياناتالنموذج.get('وصف'),
-            موقع: بياناتالنموذج.get('موقع'),
-            نوع: بياناتالنموذج.get('نوع'),
-            سعر: بياناتالنموذج.get('سعر'),
-            ملفالصورة: بياناتالنموذج.get('صورة')
+        const postData = {
+            name: formData.get('name'),
+            description: formData.get('description'),
+            location: formData.get('location'),
+            category: formData.get('category'),
+            price: formData.get('price'),
+            imageFile: formData.get('image')
         };
 
-        if (!بياناتالمنشور.اسم || !بياناتالمنشور.وصف || !بياناتالمنشور.موقع || 
-            !بياناتالمنشور.نوع || !بياناتالمنشور.سعر) {
-            Utils.عرضالحالة('يرجى ملء جميع الحقول المطلوبة', 'خطأ');
+        if (!postData.name || !postData.description || !postData.location || 
+            !postData.category || !postData.price) {
+            Utils.showStatus('يرجى ملء جميع الحقول المطلوبة', 'error');
             return;
         }
 
         try {
-            Utils.عرضالحالة('جاري نشر المنشور...', 'نجاح');
-            await المنشورات.نشرمنشور(بياناتالمنشور);
-            Utils.عرضالحالة('تم نشر المنشور بنجاح!', 'نجاح');
+            Utils.showStatus('جاري نشر المنشور...', 'success');
+            await Posts.publishPost(postData);
+            Utils.showStatus('تم نشر المنشور بنجاح!', 'success');
             
             setTimeout(() => {
-                Navigation.عرضالصفحة('الرئيسية');
+                Navigation.showPage('home');
             }, 1500);
         } catch (error) {
-            Utils.عرضالحالة(`فشل في النشر: ${error.message}`, 'خطأ');
+            Utils.showStatus(`فشل في النشر: ${error.message}`, 'error');
         }
     }
-            }
+    }
